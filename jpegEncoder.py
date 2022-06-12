@@ -38,20 +38,22 @@ std_chrominance_quant_tbl = std_chrominance_quant_tbl.reshape([8,8])
 
 def main():
 
-    # inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)
+    # inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1) text
     # example:
-    # ./lena.bmp ./output.jpg 80 0
+    # ./lena.bmp ./output.jpg 80 0 ./lorem.txt
 
-    if(len(sys.argv)!=5):
-        print('inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1)')
+    if(len(sys.argv)!=6):
+        print('inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1) inputTxtFilename')
         print('example:')
-        print('./lena.bmp ./output.jpg 80 0')
+        print('./lena.bmp ./output.jpg 80 0 text.txt')
         return
 
     srcFileName = sys.argv[1]
     outputJPEGFileName = sys.argv[2]
     quality = float(sys.argv[3])
     DEBUG_MODE = int(sys.argv[4])
+    with open(sys.argv[5]) as f:
+        text = " ".join(f.readlines())
 
 
     numpy.set_printoptions(threshold=numpy.inf)
@@ -132,6 +134,9 @@ def main():
         for x in range(0, imageWidth, 8):
             print('block (y,x): ',y, x, ' -> ', y + 8, x + 8)
             yDctMatrix = fftpack.dct(fftpack.dct(yImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
+            if blockNum < len(text):
+                yDctMatrix *= .9
+                yDctMatrix[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8] = 1000
             uDctMatrix = fftpack.dct(fftpack.dct(uImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
             vDctMatrix = fftpack.dct(fftpack.dct(vImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
             if(blockSum<=8):
