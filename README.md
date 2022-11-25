@@ -1,9 +1,8 @@
 # jpeg_dct-text_encryptor 
 
-Example:
-Ceate a JPEG file with text embedded with Menkman's DCT encryption 
+Create a JPEG file with text embedded with Menkman's DCT encryption 
 
-### **Usage:**
+## **Usage:**
 
 install the required packages with the requirements.txt file
 
@@ -13,8 +12,7 @@ run
 
 `python3 ./jpegEncoder.py inputBMPFileName outputJPEGFilename quality(from 1 to 100) DEBUGMODE(0 or 1) inputTxtFilename`
 
-
-#### Example
+### Example
 
 `python3 ./lena.bmp ./output.jpg 80 0 ird.txt`
 
