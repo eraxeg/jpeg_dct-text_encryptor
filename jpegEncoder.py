@@ -5,7 +5,7 @@ from bitstream import BitStream
 from numpy import *
 import huffmanEncode
 import sys
-
+import textwrap
 
 
 
@@ -53,8 +53,7 @@ def main():
     quality = float(sys.argv[3])
     DEBUG_MODE = int(sys.argv[4])
     with open(sys.argv[5]) as f:
-        text = " ".join(f.readlines())
-
+        text = f.read()
 
     numpy.set_printoptions(threshold=numpy.inf)
     srcImage = Image.open(srcFileName)
@@ -70,6 +69,16 @@ def main():
         imageWidth = srcImageWidth // 8 * 8 + 8
     if (srcImageHeight % 8 != 0):
         imageHeight = srcImageHeight // 8 * 8 + 8
+
+    # insert linebreaks
+    text = textwrap.fill(text, imageWidth//8, replace_whitespace=False)
+
+    # fill the lines with spaces 
+    text = text.split("\n")
+    text = list(map(lambda x: x.ljust(imageWidth//8, ' '), text))
+
+    # join it back to a single string
+    text = "".join(text)
 
     print('added to: ', imageWidth, imageHeight)
 
@@ -131,14 +140,20 @@ def main():
 
     blockNum = 0
     for y in range(0, imageHeight, 8):
+
         for x in range(0, imageWidth, 8):
-            print('block (y,x): ',y, x, ' -> ', y + 8, x + 8)
+            if DEBUG_MODE: print('block (y,x): ',y, x, ' -> ', y + 8, x + 8)
             yDctMatrix = fftpack.dct(fftpack.dct(yImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
-            if blockNum < len(text):
-                yDctMatrix *= .9
-                yDctMatrix[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8] = 1000
             uDctMatrix = fftpack.dct(fftpack.dct(uImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
             vDctMatrix = fftpack.dct(fftpack.dct(vImageMatrix[y:y + 8, x:x + 8], norm='ortho').T, norm='ortho').T
+
+            # skip if text has ended
+            if blockNum < len(text):
+                # skip if character is space
+                if text[blockNum] != " ":
+                    yDctMatrix = yDctMatrix * 0.9
+                    yDctMatrix[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8] *= 10*luminanceQuantTbl[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8]
+
             if(blockSum<=8):
                 print('yDctMatrix:\n',yDctMatrix)
                 print('uDctMatrix:\n',uDctMatrix)
@@ -156,9 +171,9 @@ def main():
             yZCode = yQuantMatrix.reshape([64])[zigzagOrder]
             uZCode = uQuantMatrix.reshape([64])[zigzagOrder]
             vZCode = vQuantMatrix.reshape([64])[zigzagOrder]
-            yZCode = yZCode.astype(numpy.int)
-            uZCode = uZCode.astype(numpy.int)
-            vZCode = vZCode.astype(numpy.int)
+            yZCode = yZCode.astype(int)
+            uZCode = uZCode.astype(int)
+            vZCode = vZCode.astype(int)
 
 
             yDC[blockNum] = yZCode[0]
