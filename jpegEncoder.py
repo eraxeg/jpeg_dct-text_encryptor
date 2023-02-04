@@ -149,10 +149,14 @@ def main():
 
             # skip if text has ended
             if blockNum < len(text):
+                char_index = ord(text[blockNum].upper())-32
+                char_index = zigzagOrder[char_index]
+                #print(yDctMatrix)
                 # skip if character is space
-                if text[blockNum] != " ":
+                if text[blockNum] != " " and char_index < 63:
+                    print(f'{char_index}: {text[blockNum]}')
                     yDctMatrix = yDctMatrix * 0.9
-                    yDctMatrix[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8] *= 10*luminanceQuantTbl[ord(text[blockNum])%8][(ord(text[blockNum])%64)//8]
+                    yDctMatrix[char_index//8][char_index%8] = 1000
 
             if(blockSum<=8):
                 print('yDctMatrix:\n',yDctMatrix)
